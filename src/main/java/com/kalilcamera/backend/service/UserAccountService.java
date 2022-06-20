@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.kalilcamera.backend.entity.UserAccount;
-import com.kalilcamera.backend.repository.UserRepository;
+import com.kalilcamera.backend.repository.UserAccountRepository;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class UserAccountService {
 
     @Autowired
-    private UserRepository userAccountRepo;
+    private UserAccountRepository userAccountRepo;
 
     public List<UserAccount> getList() {
         return userAccountRepo.findAll();
@@ -26,7 +26,17 @@ public class UserAccountService {
 
     public ResponseEntity<?> save(UserAccount usuario) {
         try {
-            validarDados(usuario);
+            if (usernameExist(usuario.getUsername().trim())) {
+                throw new Exception();
+            }
+
+            if (emailExist(usuario.getEmail().trim())) {
+                throw new Exception();
+            }
+
+            usuario.setUsername(usuario.getUsername().trim());
+            usuario.setEmail(usuario.getEmail().trim());
+            usuario.setPassword(new BCryptPasswordEncoder().encode(usuario.getPassword()));
             usuario.setActive(false);
             usuario.setRoleId(0);
             userAccountRepo.save(usuario);
@@ -37,39 +47,22 @@ public class UserAccountService {
         }
     }
 
-    public void validarDados(UserAccount userAccount) {
-        userAccount.setUsername(userAccount.getUsername().trim());
-        userAccount.setEmail(userAccount.getEmail().trim());
-        encriptarSenha(userAccount);
-    }
-
-    public void encriptarSenha(UserAccount userAccount) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        userAccount.setPassword(passwordEncoder.encode(userAccount.getPassword()));
-    }
-
-    public String encriptarEdevolverSenha(UserAccount userAccount) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.encode(userAccount.getPassword());
-    }
-
-    public Optional<UserAccount> getUsuario(Integer id) {
-        return userAccountRepo.findById(id);
-    }
-
-    public void deleteUsuario(Integer id) {
-        userAccountRepo.deleteById(id);
-    }
-
     public ResponseEntity<?> edit(UserAccount usuario, Integer id) {
-        
-            UserAccount userAlteracao;
+
             if (userAccountRepo.findById(id).isPresent()) {
+                UserAccount userAlteracao;
                 userAlteracao = userAccountRepo.findById(id).get();
                 try {
-                    userAlteracao.setEmail(usuario.getEmail());
-                    userAlteracao.setPassword(encriptarEdevolverSenha(usuario));
-                    userAlteracao.setUsername(usuario.getUsername());
+                    if (usernameExist(usuario.getUsername().trim())) {
+                        throw new Exception();
+                    }
+
+                    if (emailExist(usuario.getEmail().trim())) {
+                        throw new Exception();
+                    }
+                    userAlteracao.setEmail(usuario.getEmail().trim());
+                    userAlteracao.setPassword(new BCryptPasswordEncoder().encode(usuario.getPassword()));
+                    userAlteracao.setUsername(usuario.getUsername().trim());
                     userAccountRepo.save(userAlteracao);
                     return new ResponseEntity<>("ALTERADO", HttpStatus.OK);
                 } catch (Exception e) {

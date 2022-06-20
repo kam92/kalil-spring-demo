@@ -1,7 +1,7 @@
 package com.kalilcamera.backend.controllers;
 
 import com.kalilcamera.backend.entity.UserAccount;
-import com.kalilcamera.backend.repository.UserRepository;
+import com.kalilcamera.backend.repository.UserAccountRepository;
 import com.kalilcamera.backend.service.UserAccountService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class UserAccountController {
     UserAccountService userAccountService;
 
     @Autowired
-    UserRepository usuarioRepository;
+    UserAccountRepository usuarioRepository;
 
     @GetMapping("/lista")
     public ResponseEntity<?> listAll() {
