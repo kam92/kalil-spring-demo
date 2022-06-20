@@ -29,7 +29,7 @@ public class UserAccountController {
     }
     
     @PutMapping("/alterar")
-    public ResponseEntity<?> editUserAccount(@RequestBody UserAccount usuario, @RequestParam Integer id) {
+    public ResponseEntity<?> editUserAccount(@RequestBody UserAccount usuario, @RequestParam Long id) {
        return userAccountService.edit(usuario, id);
     }
 

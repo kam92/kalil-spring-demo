@@ -47,7 +47,7 @@ public class UserAccountService {
         }
     }
 
-    public ResponseEntity<?> edit(UserAccount usuario, Integer id) {
+    public ResponseEntity<?> edit(UserAccount usuario, Long id) {
 
             if (userAccountRepo.findById(id).isPresent()) {
                 UserAccount userAlteracao;
@@ -60,6 +60,7 @@ public class UserAccountService {
                     if (emailExist(usuario.getEmail().trim())) {
                         throw new Exception();
                     }
+
                     userAlteracao.setEmail(usuario.getEmail().trim());
                     userAlteracao.setPassword(new BCryptPasswordEncoder().encode(usuario.getPassword()));
                     userAlteracao.setUsername(usuario.getUsername().trim());
