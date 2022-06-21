@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	
-	<groupId>com.cameraltda</groupId>
-	<artifactId>runeworld</artifactId>
+	<groupId>com.kalilcamera</groupId>
+	<artifactId>demo-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>runeworld</name>
 	<properties>
