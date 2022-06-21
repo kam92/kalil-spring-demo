@@ -1,9 +1,12 @@
 package com.kalilcamera.backend.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.kalilcamera.backend.entity.UserAccount;
+import com.kalilcamera.backend.dto.UserGetDto;
+import com.kalilcamera.backend.dto.UserPostDto;
+import com.kalilcamera.backend.entity.UserEntity;
 import com.kalilcamera.backend.repository.UserAccountRepository;
 import javax.transaction.Transactional;
 
@@ -20,26 +23,42 @@ public class UserAccountService {
     @Autowired
     private UserAccountRepository userAccountRepo;
 
-    public List<UserAccount> getList() {
-        return userAccountRepo.findAll();
+    public List<UserGetDto> getUserEntityList() {
+        return getUserDtoList();
     }
 
-    public ResponseEntity<?> save(UserAccount usuario) {
+    public ArrayList<UserGetDto> getUserDtoList() {
+        List< UserEntity> userEntityList = userAccountRepo.findAll();
+       ArrayList<UserGetDto> userGetDtoList = new ArrayList<>();
+
+        for (UserEntity userEntity : userEntityList) {
+            UserGetDto userGetDto = new UserGetDto();
+            userGetDto.setEmail(userEntity.getEmail());
+            userGetDto.setUsername(userEntity.getUsername());
+            userGetDto.setActive(userEntity.isActive());
+            userGetDto.setRoleId(userEntity.getRoleId());
+            userGetDtoList.add(userGetDto);
+        }
+        return userGetDtoList;
+    }
+
+    public ResponseEntity<?> save(UserPostDto userPostDto) {
         try {
-            if (usernameExist(usuario.getUsername().trim())) {
+            if (usernameExist(userPostDto.getUsername().trim())) {
                 throw new Exception();
             }
 
-            if (emailExist(usuario.getEmail().trim())) {
+            if (emailExist(userPostDto.getEmail().trim())) {
                 throw new Exception();
             }
 
-            usuario.setUsername(usuario.getUsername().trim());
-            usuario.setEmail(usuario.getEmail().trim());
-            usuario.setPassword(new BCryptPasswordEncoder().encode(usuario.getPassword()));
-            usuario.setActive(false);
-            usuario.setRoleId(0);
-            userAccountRepo.save(usuario);
+            UserEntity userEntity = new UserEntity();
+            userEntity.setUsername(userPostDto.getUsername().trim());
+            userEntity.setEmail(userPostDto.getEmail().trim());
+            userEntity.setPassword(new BCryptPasswordEncoder().encode(userPostDto.getPassword()));
+            userEntity.setActive(false);
+            userEntity.setRoleId(0);
+            userAccountRepo.save(userEntity);
             return new ResponseEntity<>("CADASTRADO", HttpStatus.CREATED);
 
         } catch (Exception e) {
@@ -47,24 +66,23 @@ public class UserAccountService {
         }
     }
 
-    public ResponseEntity<?> edit(UserAccount usuario, Long id) {
+    public ResponseEntity<?> edit(UserPostDto userPostDto, Long id) {
 
-            if (userAccountRepo.findById(id).isPresent()) {
-                UserAccount userAlteracao;
-                userAlteracao = userAccountRepo.findById(id).get();
+        if (userAccountRepo.existsById(id)) {
+                UserEntity userEntityAlteracao = userAccountRepo.findById(id).get();
                 try {
-                    if (usernameExist(usuario.getUsername().trim())) {
+                    if (usernameExist(userPostDto.getUsername().trim())) {
                         throw new Exception();
                     }
 
-                    if (emailExist(usuario.getEmail().trim())) {
+                    if (emailExist(userPostDto.getEmail().trim())) {
                         throw new Exception();
                     }
 
-                    userAlteracao.setEmail(usuario.getEmail().trim());
-                    userAlteracao.setPassword(new BCryptPasswordEncoder().encode(usuario.getPassword()));
-                    userAlteracao.setUsername(usuario.getUsername().trim());
-                    userAccountRepo.save(userAlteracao);
+                    userEntityAlteracao.setEmail(userPostDto.getEmail().trim());
+                    userEntityAlteracao.setPassword(new BCryptPasswordEncoder().encode(userPostDto.getPassword()));
+                    userEntityAlteracao.setUsername(userPostDto.getUsername().trim());
+                    userAccountRepo.save(userEntityAlteracao);
                     return new ResponseEntity<>("ALTERADO", HttpStatus.OK);
                 } catch (Exception e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -73,11 +91,11 @@ public class UserAccountService {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    public Optional<UserAccount> findByEmail(String email) {
+    public Optional<UserGetDto> findByEmail(String email) {
         return userAccountRepo.findByEmail(email);
     }
 
-    public Optional<UserAccount> findByUsername(String name) {
+    public Optional<UserGetDto> findByUsername(String name) {
         return userAccountRepo.findByUsername(name);
     }
 

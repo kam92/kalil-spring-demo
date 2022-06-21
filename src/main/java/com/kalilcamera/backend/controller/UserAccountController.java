@@ -1,6 +1,6 @@
-package com.kalilcamera.backend.controllers;
+package com.kalilcamera.backend.controller;
 
-import com.kalilcamera.backend.entity.UserAccount;
+import com.kalilcamera.backend.dto.UserPostDto;
 import com.kalilcamera.backend.repository.UserAccountRepository;
 import com.kalilcamera.backend.service.UserAccountService;
 
@@ -20,16 +20,16 @@ public class UserAccountController {
 
     @GetMapping("/lista")
     public ResponseEntity<?> listAll() {
-        return new ResponseEntity<>(userAccountService.getList(), HttpStatus.OK);
+        return new ResponseEntity<>(userAccountService.getUserEntityList(), HttpStatus.OK);
     }
 
     @PostMapping("/cadastro")
-    public ResponseEntity<?> createUserAccount(@RequestBody UserAccount usuario) {
+    public ResponseEntity<?> createUserAccount(@RequestBody UserPostDto usuario) {
         return userAccountService.save(usuario);
     }
     
     @PutMapping("/alterar")
-    public ResponseEntity<?> editUserAccount(@RequestBody UserAccount usuario, @RequestParam Long id) {
+    public ResponseEntity<?> editUserAccount(@RequestBody UserPostDto usuario, @RequestParam Long id) {
        return userAccountService.edit(usuario, id);
     }
 
