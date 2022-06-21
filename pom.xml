@@ -12,7 +12,7 @@
 	<groupId>com.kalilcamera</groupId>
 	<artifactId>demo-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>runeworld</name>
+	<name>backend</name>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
