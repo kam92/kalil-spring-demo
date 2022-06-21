@@ -23,10 +23,6 @@ public class UserAccountService {
     @Autowired
     private UserAccountRepository userAccountRepo;
 
-    public List<UserGetDto> getUserEntityList() {
-        return getUserDtoList();
-    }
-
     public ArrayList<UserGetDto> getUserDtoList() {
         List< UserEntity> userEntityList = userAccountRepo.findAll();
        ArrayList<UserGetDto> userGetDtoList = new ArrayList<>();

@@ -20,7 +20,7 @@ public class UserAccountController {
 
     @GetMapping("/lista")
     public ResponseEntity<?> listAll() {
-        return new ResponseEntity<>(userAccountService.getUserEntityList(), HttpStatus.OK);
+        return new ResponseEntity<>(userAccountService.getUserDtoList(), HttpStatus.OK);
     }
 
     @PostMapping("/cadastro")
