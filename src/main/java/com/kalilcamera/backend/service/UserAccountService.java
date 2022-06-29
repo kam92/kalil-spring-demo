@@ -39,17 +39,10 @@ public class UserAccountService {
 
     public ResponseEntity<?> save(UserPostDto userPostDto) {
         try {
-
-            if (usernameExist(userPostDto.getUsername().trim())) {
-                throw new Exception();
-            }
-
-            if (emailExist(userPostDto.getEmail().trim())) {
-                throw new Exception();
-            }
+            userModifyRoutine(userPostDto);
             UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(userPostDto.getUsername().trim());
-            userEntity.setEmail(userPostDto.getEmail().trim());
+            userEntity.setUsername(userPostDto.getUsername());
+            userEntity.setEmail(userPostDto.getEmail());
             userEntity.setPassword(new BCryptPasswordEncoder().encode(userPostDto.getPassword()));
             userEntity.setActive(false);
             userEntity.setRoleId(0);
@@ -63,27 +56,17 @@ public class UserAccountService {
 
     public ResponseEntity<?> edit(UserPostDto userPostDto, Long id) {
 
-        if (userAccountRepo.existsById(id)) {
-                UserEntity userEntityAlteracao = userAccountRepo.findById(id).get();
                 try {
-                    if (usernameExist(userPostDto.getUsername().trim())) {
-                        throw new Exception();
-                    }
-
-                    if (emailExist(userPostDto.getEmail().trim())) {
-                        throw new Exception();
-                    }
-
-                    userEntityAlteracao.setEmail(userPostDto.getEmail().trim());
+                    userModifyRoutine(userPostDto);
+                    UserEntity userEntityAlteracao = userAccountRepo.findById(id).get();
+                    userEntityAlteracao.setEmail(userPostDto.getEmail());
                     userEntityAlteracao.setPassword(new BCryptPasswordEncoder().encode(userPostDto.getPassword()));
-                    userEntityAlteracao.setUsername(userPostDto.getUsername().trim());
+                    userEntityAlteracao.setUsername(userPostDto.getUsername());
                     userAccountRepo.save(userEntityAlteracao);
-                    return new ResponseEntity<>("ALTERADO", HttpStatus.OK);
+                    return new ResponseEntity<>("changed data for user id "+userEntityAlteracao.getId().toString()+".", HttpStatus.OK);
                 } catch (Exception e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
-            }
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     public Optional<UserGetDto> findByEmail(String email) {
@@ -100,5 +83,25 @@ public class UserAccountService {
 
     public boolean usernameExist(String name) {
         return userAccountRepo.existsByUsername(name);
+    }
+    public void trimFields(UserPostDto userPostDto) {
+        userPostDto.setEmail(userPostDto.getEmail().trim());
+        userPostDto.setUsername(userPostDto.getUsername().trim());
+    }
+
+    public boolean validateFields(UserPostDto userPostDto) {
+        if (usernameExist(userPostDto.getUsername())) {
+            return false;
+        }
+        if (emailExist(userPostDto.getEmail())) {
+            return false;
+        }
+        return true;
+    }
+    public void userModifyRoutine(UserPostDto userPostDto) throws Exception {
+        trimFields(userPostDto);
+        if (!validateFields(userPostDto)) {
+            throw new Exception();
+        }
     }
 }

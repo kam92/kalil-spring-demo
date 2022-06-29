@@ -13,7 +13,8 @@ import javax.validation.constraints.Email;
 @Setter
 public class UserPostDto {
 
+    @Email
+    private String email;
     private String username;
-    @Email private String email;
     private String password;
 }

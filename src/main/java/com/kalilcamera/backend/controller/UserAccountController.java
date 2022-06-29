@@ -18,7 +18,7 @@ public class UserAccountController {
     UserAccountRepository usuarioRepository;
 
     @GetMapping("/lista")
-    public ResponseEntity<?> listAll() {
+    public ResponseEntity<?> listAllUserAccount() {
         return new ResponseEntity<>(userAccountService.getUserDtoList(), HttpStatus.OK);
     }
 
