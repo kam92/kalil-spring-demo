@@ -39,7 +39,7 @@ public class UserAccountService {
 
     public ResponseEntity<?> save(UserPostDto userPostDto) {
         try {
-            userModifyRoutine(userPostDto);
+            verifyIfUserExists(userPostDto);
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(userPostDto.getUsername());
             userEntity.setEmail(userPostDto.getEmail());
@@ -54,10 +54,9 @@ public class UserAccountService {
         }
     }
 
-    public ResponseEntity<?> edit(UserPostDto userPostDto, Long id) {
-
+    public ResponseEntity<?> edit( Long id, UserPostDto userPostDto) {
                 try {
-                    userModifyRoutine(userPostDto);
+                    verifyIfUserExists(userPostDto);
                     UserEntity userEntityAlteracao = userAccountRepo.findById(id).get();
                     userEntityAlteracao.setEmail(userPostDto.getEmail());
                     userEntityAlteracao.setPassword(new BCryptPasswordEncoder().encode(userPostDto.getPassword()));
@@ -93,12 +92,9 @@ public class UserAccountService {
         if (usernameExist(userPostDto.getUsername())) {
             return false;
         }
-        if (emailExist(userPostDto.getEmail())) {
-            return false;
-        }
-        return true;
+        return !emailExist(userPostDto.getEmail());
     }
-    public void userModifyRoutine(UserPostDto userPostDto) throws Exception {
+    public void verifyIfUserExists(UserPostDto userPostDto) throws Exception {
         trimFields(userPostDto);
         if (!validateFields(userPostDto)) {
             throw new Exception();

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,7 +15,12 @@ import javax.validation.constraints.Email;
 public class UserPostDto {
 
     @Email
+    @NotNull
     private String email;
+
+    @NotNull
     private String username;
+
+    @NotNull
     private String password;
 }

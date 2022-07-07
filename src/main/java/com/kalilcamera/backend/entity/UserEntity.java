@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -13,7 +14,6 @@ import javax.validation.constraints.Email;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-
 public class UserEntity {
 
     @Id
@@ -22,13 +22,16 @@ public class UserEntity {
     private Long id;
 
     @Column(unique = true, nullable = false, length = 50)
+    @NotNull
     private String username;
 
     @Column(unique = true, nullable = false)
     @Email
+    @NotNull
     private String email;
 
     @Column(name="pw", nullable = false)
+    @NotNull
     private String password;
 
     @Column(columnDefinition = "TINYINT")
