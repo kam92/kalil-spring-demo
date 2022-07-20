@@ -1,9 +1,9 @@
 package com.kalilcamera.backend.service;
 
-import com.kalilcamera.backend.dto.UserGetDto;
-import com.kalilcamera.backend.dto.UserPostDto;
 import com.kalilcamera.backend.entity.UserEntity;
-import com.kalilcamera.backend.repository.UserAccountRepository;
+import com.kalilcamera.backend.repository.UserMapper;
+import com.kalilcamera.backend.repository.UserRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,32 +20,22 @@ import java.util.Optional;
 public class UserAccountService {
 
     @Autowired
-    private UserAccountRepository userAccountRepo;
+    private UserRepository userAccountRepo;
 
-    public List<UserGetDto> getUserDtoList() {
-        List< UserEntity> userEntityList = userAccountRepo.findAll();
-        List<UserGetDto> userGetDtoList = new ArrayList<>();
-
-        for (UserEntity userEntity : userEntityList) {
-            UserGetDto userGetDto = new UserGetDto();
-            userGetDto.setEmail(userEntity.getEmail());
-            userGetDto.setUsername(userEntity.getUsername());
-            userGetDto.setActive(userEntity.isActive());
-            userGetDto.setRoleId(userEntity.getRoleId());
-            userGetDtoList.add(userGetDto);
-        }
-        return userGetDtoList;
+    public List<UserEntity> getUserList() {
+        return userAccountRepo.findAll();
     }
 
-    public ResponseEntity<?> save(UserPostDto userPostDto) {
+    public ResponseEntity<?> save(UserEntity user) {
         try {
-            verifyIfUserExists(userPostDto);
+            verifyIfUserExists(user);
             UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(userPostDto.getUsername());
-            userEntity.setEmail(userPostDto.getEmail());
-            userEntity.setPassword(new BCryptPasswordEncoder().encode(userPostDto.getPassword()));
+            userEntity.setUsername(user.getUsername());
+            userEntity.setEmail(user.getEmail());
+            userEntity.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
             userEntity.setActive(false);
             userEntity.setRoleId(0);
+            userEntity.setCreatedAt(LocalDateTime.now());
             userAccountRepo.save(userEntity);
             return new ResponseEntity<>(userEntity, HttpStatus.CREATED);
 
@@ -54,25 +44,27 @@ public class UserAccountService {
         }
     }
 
-    public ResponseEntity<?> edit( Long id, UserPostDto userPostDto) {
-                try {
-                    verifyIfUserExists(userPostDto);
-                    UserEntity userEntityAlteracao = userAccountRepo.findById(id).get();
-                    userEntityAlteracao.setEmail(userPostDto.getEmail());
-                    userEntityAlteracao.setPassword(new BCryptPasswordEncoder().encode(userPostDto.getPassword()));
-                    userEntityAlteracao.setUsername(userPostDto.getUsername());
-                    userAccountRepo.save(userEntityAlteracao);
-                    return new ResponseEntity<>("changed data for user id "+userEntityAlteracao.getId().toString()+".", HttpStatus.OK);
-                } catch (Exception e) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
+    public Optional<UserEntity> edit( Long id, UserEntity user) {
+            try {
+
+                return userAccountRepo.findById(id)
+                        .map(userEntity -> {
+                            userEntity.setUsername(user.getUsername());
+                            userEntity.setEmail(user.getEmail());
+                            userEntity.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+                            return userAccountRepo.save(userEntity);
+                        });
+            } catch (Exception e) {
+
+            }
+        return Optional.empty();
     }
 
-    public Optional<UserGetDto> findByEmail(String email) {
+    public Optional<UserEntity> findByEmail(String email) {
         return userAccountRepo.findByEmail(email);
     }
 
-    public Optional<UserGetDto> findByUsername(String name) {
+    public Optional<UserEntity> findByUsername(String name) {
         return userAccountRepo.findByUsername(name);
     }
 
@@ -83,21 +75,17 @@ public class UserAccountService {
     public boolean usernameExist(String name) {
         return userAccountRepo.existsByUsername(name);
     }
-    public void trimFields(UserPostDto userPostDto) {
-        userPostDto.setEmail(userPostDto.getEmail().trim());
-        userPostDto.setUsername(userPostDto.getUsername().trim());
+
+    public void trimFields(@NotNull UserEntity user) {
+        user.setEmail(user.getEmail().trim());
+        user.setUsername(user.getUsername().trim());
     }
 
-    public boolean validateFields(UserPostDto userPostDto) {
-        if (usernameExist(userPostDto.getUsername())) {
-            return false;
-        }
-        return !emailExist(userPostDto.getEmail());
+    public boolean validateFields(String name, String email) {
+        return !usernameExist(name) && !emailExist(email);
     }
-    public void verifyIfUserExists(UserPostDto userPostDto) throws Exception {
-        trimFields(userPostDto);
-        if (!validateFields(userPostDto)) {
-            throw new Exception();
-        }
+    public boolean verifyIfUserExists(UserEntity userEntity)  {
+        trimFields(userEntity);
+        return validateFields(userEntity.getUsername(), userEntity.getEmail());
     }
 }

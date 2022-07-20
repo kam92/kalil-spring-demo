@@ -6,6 +6,8 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,8 +15,9 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder(toBuilder = true)
 @Table(name = "users")
-public class UserEntity {
+public class UserEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,4 +44,10 @@ public class UserEntity {
     @Column
     private Integer roleId;
 
+    @Column
+    private LocalDateTime createdAt;
+
+    @Column
+    @ManyToMany(fetch = FetchType.LAZY)
+    private LocalDateTime updatedAt;
 } 
