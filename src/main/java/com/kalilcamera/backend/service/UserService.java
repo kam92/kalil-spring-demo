@@ -1,7 +1,6 @@
 package com.kalilcamera.backend.service;
 
 import com.kalilcamera.backend.entity.UserEntity;
-import com.kalilcamera.backend.repository.UserMapper;
 import com.kalilcamera.backend.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class UserAccountService {
+public class UserService {
 
     @Autowired
     private UserRepository userAccountRepo;
@@ -40,13 +39,12 @@ public class UserAccountService {
             return new ResponseEntity<>(userEntity, HttpStatus.CREATED);
 
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Usuario e email devem ser únicos.",HttpStatus.CONFLICT);
         }
     }
 
     public Optional<UserEntity> edit( Long id, UserEntity user) {
             try {
-
                 return userAccountRepo.findById(id)
                         .map(userEntity -> {
                             userEntity.setUsername(user.getUsername());
@@ -55,37 +53,39 @@ public class UserAccountService {
                             return userAccountRepo.save(userEntity);
                         });
             } catch (Exception e) {
-
+                return Optional.empty();
             }
-        return Optional.empty();
     }
 
     public Optional<UserEntity> findByEmail(String email) {
         return userAccountRepo.findByEmail(email);
     }
-
     public Optional<UserEntity> findByUsername(String name) {
         return userAccountRepo.findByUsername(name);
     }
-
     public boolean emailExist(String email) {
         return userAccountRepo.existsByEmail(email);
     }
-
     public boolean usernameExist(String name) {
         return userAccountRepo.existsByUsername(name);
     }
-
     public void trimFields(@NotNull UserEntity user) {
         user.setEmail(user.getEmail().trim());
         user.setUsername(user.getUsername().trim());
     }
 
-    public boolean validateFields(String name, String email) {
-        return !usernameExist(name) && !emailExist(email);
+    public void validateFields(String name, String email) {
+        if (!usernameExist(name)) {
+            emailExist(email);
+        }
     }
-    public boolean verifyIfUserExists(UserEntity userEntity)  {
+    public void verifyIfUserExists(UserEntity userEntity)  {
         trimFields(userEntity);
-        return validateFields(userEntity.getUsername(), userEntity.getEmail());
+        validateFields(userEntity.getUsername(), userEntity.getEmail());
+    }
+
+    public Optional<UserEntity> delete(Long id) {
+        return userAccountRepo.deleteById(id);
+
     }
 }

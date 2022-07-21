@@ -46,8 +46,4 @@ public class UserEntity implements Serializable {
 
     @Column
     private LocalDateTime createdAt;
-
-    @Column
-    @ManyToMany(fetch = FetchType.LAZY)
-    private LocalDateTime updatedAt;
 } 
