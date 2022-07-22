@@ -84,7 +84,7 @@ public class UserService {
         validateFields(userEntity.getUsername(), userEntity.getEmail());
     }
 
-    public Optional<UserEntity> delete(Long id) {
+    public Optional<UserEntity> deleteById(Long id) {
         return userAccountRepo.deleteById(id);
 
     }
